@@ -1,0 +1,20 @@
+# GitHub Actionsワークフローの名前
+name: Deploy then notify Slack
+
+# masterブランチに対するPRがクローズ（マージまたは却下）された時に実行
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log event info
+        run: |
+          echo "Event type: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "PR branch: ${{ github.event.pull_request.base.ref }}"
+          echo "Is merged: ${{ github.event.pull_request.merged }}"
