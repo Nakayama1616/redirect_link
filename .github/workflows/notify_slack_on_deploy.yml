@@ -9,12 +9,32 @@ on:
       - deploy/test
 
 jobs:
-  test-job:
+  notify-slack:
+    # PRがマージされた場合のみジョブを実行（却下された場合は実行しない）
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Log event info
-        run: |
-          echo "Event type: ${{ github.event_name }}"
-          echo "Action: ${{ github.event.action }}"
-          echo "PR branch: ${{ github.event.pull_request.base.ref }}"
-          echo "Is merged: ${{ github.event.pull_request.merged }}"
+      # Slackに通知を送信するステップ
+      - name: Send notification to Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          # カスタムステータスを使用して独自のメッセージフォーマットを定義
+          status: custom
+          # 通知に含めるGitHub情報（リポジトリ、メッセージ、コミット、作成者）
+          fields: repo,message,commit,author
+          # Slackに送信するカスタムメッセージの定義
+          custom_payload: |
+            {
+              "attachments": [{
+                "color": "good",
+                "text": "${{ github.event.repository.name }}\n• <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>"
+              }]
+            }
+        env:
+          # SlackのIncoming Webhook URLをGitHubシークレットから取得
+          # リポジトリの Settings > Secrets and variables > Actions で設定する必要があります
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          # 通知の送信者名を設定
+          SLACK_USERNAME: DeployBot
+          # 通知のアイコンを設定
+          SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
