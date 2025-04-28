@@ -6,7 +6,8 @@ on:
   pull_request_target:
     types: [closed]
     branches:
-      - deploy/test
+      - deploy/test  # テスト用にstagingブランチに対するPRの場合のみ
+      # - master  # masterブランチに対するPRの場合のみ
 
 jobs:
   notify-slack:
